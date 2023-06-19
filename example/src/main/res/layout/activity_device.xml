@@ -54,7 +54,7 @@
                     android:id="@+id/device_connectivity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/disconnectd"
+                    android:text="@string/disconnected"
                     android:textColor="#616161" />
             </LinearLayout>
 
@@ -89,11 +89,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/drowsiness"
+                    android:text="@string/calmness"
                     android:textColor="#616161" />
 
                 <TextView
-                    android:id="@+id/device_drowsiness"
+                    android:id="@+id/device_calmness"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/unknown_value"
@@ -215,7 +215,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/lowbeta"
+                    android:text="@string/lowBeta"
                     android:textColor="#616161" />
 
                 <TextView
@@ -236,7 +236,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/highbeta"
+                    android:text="@string/highBeta"
                     android:textColor="#616161" />
 
                 <TextView

@@ -36,7 +36,7 @@ android {
 }
 
 dependencies {
-    api 'tech.brainco:zenlitesdk:0.7.6'
+    api 'tech.brainco:zenlitesdk:0.9.5'
 
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
 

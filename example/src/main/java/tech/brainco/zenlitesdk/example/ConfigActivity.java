@@ -51,7 +51,6 @@ public class ConfigActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
         setupViews();
-        setupSpinners();
 
         // Setup device
         device = getSelectedZenLiteDevice();
@@ -83,63 +82,6 @@ public class ConfigActivity extends BaseActivity {
         spinnerRldChannel = findViewById(R.id.spinner_rld_channel);
         spinnerLeadOffChannel = findViewById(R.id.spinner_lead_off_channel);
         spinnerImuSampleRate = findViewById(R.id.spinner_imu_sample_rate);
-    }
-
-    private void setupSpinners() {
-//        ArrayAdapter<String> afeSampleRateAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        for (Field field : ZenLiteSDK.AFESampleRate.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                afeSampleRateAdapter.add(field.getName());
-//        }
-//        afeSampleRateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerAfeSampleRate.setAdapter(afeSampleRateAdapter);
-//        spinnerAfeSampleRate.setSelection(0);
-
-//        ArrayAdapter<String> afeDataChannelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        for (Field field : ZenLiteSDK.AFEDataChannel.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                afeDataChannelAdapter.add(field.getName());
-//        }
-//        afeSampleRateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerDataChannel.setAdapter(afeDataChannelAdapter);
-//        spinnerDataChannel.setSelection(0);
-
-//        ArrayAdapter<String> afeDataLeadOffOptionAdapter = new ArrayAdapter<>(this,
-//                android.R.layout.simple_spinner_item);
-//        for (Field field : ZenLiteSDK.AFELeadOffOption.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                afeDataLeadOffOptionAdapter.add(field.getName());
-//        }
-//        afeDataLeadOffOptionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerLeadOffOption.setAdapter(afeDataLeadOffOptionAdapter);
-//        spinnerLeadOffOption.setSelection(0);
-
-//        ArrayAdapter<String> imuDataSampleRateAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        for (Field field : IMUSampleRate.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                imuDataSampleRateAdapter.add(field.getName());
-//        }
-//        imuDataSampleRateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerImuSampleRate.setAdapter(imuDataSampleRateAdapter);
-//        spinnerImuSampleRate.setSelection(0);
-
-//        ArrayAdapter<String> leadOffChannelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        for (Field field : ZenLiteSDK.AFEDataChannel.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                leadOffChannelAdapter.add(field.getName());
-//        }
-//        leadOffChannelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerLeadOffChannel.setAdapter(leadOffChannelAdapter);
-//        spinnerLeadOffChannel.setSelection(0);
-
-//        ArrayAdapter<String> rldChannelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        for (Field field : ZenLiteSDK.AFEDataChannel.class.getDeclaredFields()) {
-//            if (Modifier.isStatic(field.getModifiers()))
-//                rldChannelAdapter.add(field.getName());
-//        }
-//        rldChannelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinnerRldChannel.setAdapter(rldChannelAdapter);
-//        spinnerRldChannel.setSelection(0);
     }
 
     @Override
@@ -190,7 +132,7 @@ public class ConfigActivity extends BaseActivity {
     private class DeviceListener extends ZenLiteDeviceListener {
 
         @Override
-        public void onConnectivityChange(int connectivity) {
+        public void onConnectivityChange(ZenLiteSDK.Connectivity connectivity) {
             if (connectivity == ZenLiteSDK.Connectivity.CONNECTED) {
                 connectButton.setVisible(false);
                 disconnectButton.setVisible(true);
@@ -225,24 +167,12 @@ public class ConfigActivity extends BaseActivity {
     public void sendAFEConfiguration(View v) {
         if (device.isConnected()) {
             try {
-//                int afeSampleRate = ZenLiteSDK.AFESampleRate.class
-//                        .getDeclaredField((String) spinnerAfeSampleRate.getSelectedItem()).getInt(null);
-//                int afeDataChannel = ZenLiteSDK.AFEDataChannel.class
-//                        .getDeclaredField((String) spinnerDataChannel.getSelectedItem()).getInt(null);
-//                int leadOffOption = ZenLiteSDK.AFELeadOffOption.class
-//                        .getDeclaredField((String) spinnerLeadOffOption.getSelectedItem()).getInt(null);
-//                int rldOption = ZenLiteSDK.AFEDataChannel.class
-//                        .getDeclaredField((String) spinnerRldChannel.getSelectedItem()).getInt(null);
-//                int leadOffChannel = ZenLiteSDK.AFEDataChannel.class
-//                        .getDeclaredField((String) spinnerLeadOffChannel.getSelectedItem()).getInt(null);
-//
-//                Toast.makeText(getApplicationContext(), "sending AFE configuration...", Toast.LENGTH_SHORT).show();
-//
-//                device.configAfe(afeSampleRate, afeDataChannel, leadOffOption, leadOffChannel, rldOption, error -> {
-//                    if (error != null) {
-//                        Log.i("configAfe:" + error.getCode(), "configAfe " + error.getMessage());
-//                    }
-//                });
+                Toast.makeText(getApplicationContext(), "sending AFE configuration...", Toast.LENGTH_SHORT).show();
+                device.startEEG(error -> {
+                    if (error != null) {
+                        Log.d(ConfigActivity.class.getSimpleName(), error.toString());
+                    }
+                });
             } catch (Exception e) {
                 Log.i("Error", e.getMessage());
             }
@@ -254,8 +184,6 @@ public class ConfigActivity extends BaseActivity {
     public void sendIMUConfiguration(View v) {
         if (device.isConnected()) {
             try {
-                // int sampleRate = IMUSampleRate.class.getDeclaredField((String)
-                // spinnerImuSampleRate.getSelectedItem()).getInt(null);
                 Toast.makeText(getApplicationContext(), "sending ACC configuration...", Toast.LENGTH_SHORT).show();
                 device.startIMU(error -> {
                     if (error != null) {
@@ -268,7 +196,6 @@ public class ConfigActivity extends BaseActivity {
         } else {
             deviceNotConnectedAlert();
         }
-
     }
 
     public void renameClick(View v) {
@@ -316,39 +243,39 @@ public class ConfigActivity extends BaseActivity {
     }
 
     public void redClick(View v) {
-        if (device.isConnected()) {
-            device.setLEDColor(255, 0, 0, error -> {
-                if (error != null) {
-                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:red: " + error.getMessage());
-                }
-            });
-        } else {
-            deviceNotConnectedAlert();
-        }
+//        if (device.isConnected()) {
+//            device.setLEDColor(255, 0, 0, error -> {
+//                if (error != null) {
+//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:red: " + error.getMessage());
+//                }
+//            });
+//        } else {
+//            deviceNotConnectedAlert();
+//        }
     }
 
     public void greenClick(View v) {
-        if (device.isConnected()) {
-            device.setLEDColor(0, 255, 0, error -> {
-                if (error != null) {
-                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:green: " + error.getMessage());
-                }
-            });
-        } else {
-            deviceNotConnectedAlert();
-        }
+//        if (device.isConnected()) {
+//            device.setLEDColor(0, 255, 0, error -> {
+//                if (error != null) {
+//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:green: " + error.getMessage());
+//                }
+//            });
+//        } else {
+//            deviceNotConnectedAlert();
+//        }
     }
 
     public void blueClick(View v) {
-        if (device.isConnected()) {
-            device.setLEDColor(0, 0, 255, error -> {
-                if (error != null) {
-                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:blue: " + error.getMessage());
-                }
-            });
-        } else {
-            deviceNotConnectedAlert();
-        }
+//        if (device.isConnected()) {
+//            device.setLEDColor(0, 0, 255, error -> {
+//                if (error != null) {
+//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:blue: " + error.getMessage());
+//                }
+//            });
+//        } else {
+//            deviceNotConnectedAlert();
+//        }
     }
 
     public void shutDownClick() {

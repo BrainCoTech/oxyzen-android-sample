@@ -21,6 +21,7 @@ import tech.brainco.zenlitesdk.DeviceInfo;
 import tech.brainco.zenlitesdk.EEG;
 import tech.brainco.zenlitesdk.IMU;
 import tech.brainco.zenlitesdk.PPG;
+import tech.brainco.zenlitesdk.PPGSampleRate;
 import tech.brainco.zenlitesdk.ZenLiteDevice;
 import tech.brainco.zenlitesdk.ZenLiteDeviceListener;
 import tech.brainco.zenlitesdk.ZenLiteOTA;
@@ -39,7 +40,7 @@ public class DeviceActivity extends BaseActivity {
     private TextView eegDataText;
     private TextView deviceConnectivityText;
     private TextView deviceContactStateText;
-    private TextView deviceDrowsinessText;
+    private TextView deviceCalmnessText;
     private TextView deviceMeditationText;
 
     private TextView deviceDelta;
@@ -60,8 +61,8 @@ public class DeviceActivity extends BaseActivity {
         super.onStop();
 
         Log.i(TAG, "onStop");
-         stopEEG();
-         stopIMU();
+        stopEEG();
+        stopIMU();
         device.stopPPG(null);
     }
 
@@ -101,7 +102,7 @@ public class DeviceActivity extends BaseActivity {
 
         deviceConnectivityText = findViewById(R.id.device_connectivity);
         deviceContactStateText = findViewById(R.id.device_contact_state);
-        deviceDrowsinessText = findViewById(R.id.device_drowsiness);
+        deviceCalmnessText = findViewById(R.id.device_calmness);
         deviceMeditationText = findViewById(R.id.device_meditation);
 
         deviceDelta = findViewById(R.id.device_delta);
@@ -179,7 +180,7 @@ public class DeviceActivity extends BaseActivity {
 
         @SuppressLint("SetTextI18n")
         @Override
-        public void onConnectivityChange(int connectivity) {
+        public void onConnectivityChange(ZenLiteSDK.Connectivity connectivity) {
             Log.d(TAG, "connectivity=" + connectivity);
             connectButton.setVisible(false);
             disconnectButton.setVisible(false);
@@ -218,9 +219,9 @@ public class DeviceActivity extends BaseActivity {
 
         @SuppressLint("SetTextI18n")
         @Override
-        public void onContactStateChange(int state) {
+        public void onContactStateChange(ZenLiteSDK.ContactState state) {
             Log.i(TAG, "ContactState=" + state);
-            if (state == ZenLiteSDK.ContactState.EEG || state == ZenLiteSDK.ContactState.ALL)
+            if (state.isContacted())
                 deviceContactStateText.setText("Contacted");
             else if (state == ZenLiteSDK.ContactState.OFF)
                 deviceContactStateText.setText("LeadOff");
@@ -229,7 +230,7 @@ public class DeviceActivity extends BaseActivity {
         }
 
         @Override
-        public void onOrientationChange(int orientation) {
+        public void onOrientationChange(ZenLiteSDK.Orientation orientation) {
             // Log.d(TAG, "orientation=" + orientation);
         }
 
@@ -239,9 +240,10 @@ public class DeviceActivity extends BaseActivity {
         }
 
         @Override
-        public void onPPGData(PPG data) {
-            Log.i(TAG, "hr=" + data.algo_data.hr +  " spo2=" + data.algo_data.spo2);
-//            Log.i(TAG, data.toString());
+        public void onPPGData(PPG ppg) {
+//            if (ppg.algo_data != null) Log.i(TAG, "hr=" + ppg.algo_data.hr +  " spo2=" + ppg.algo_data.spo2);
+            Log.i(TAG, ppg.toString());
+//            ppgDataText.setText(ppg.toString());
         }
 
         @Override
@@ -270,8 +272,8 @@ public class DeviceActivity extends BaseActivity {
         }
 
         @Override
-        public void onDrowsiness(float value) {
-            deviceDrowsinessText.setText(String.valueOf(value));
+        public void onCalmness(float value) {
+            deviceCalmnessText.setText(String.valueOf(value));
         }
 
         @Override
@@ -321,7 +323,7 @@ public class DeviceActivity extends BaseActivity {
 
     @SuppressLint("SetTextI18n")
     private void startEEG() {
-        device.startEEGStream(error -> {
+        device.startEEG(error -> {
             if (error != null) {
                 Log.i(TAG, "startEEG:" + error.getCode() + ", message=" + error.getMessage());
             } else {
@@ -332,7 +334,7 @@ public class DeviceActivity extends BaseActivity {
     }
 
     private void stopEEG() {
-        device.stopEEGStream(null);
+        device.stopEEG(null);
     }
 
     private void startIMU() {
@@ -356,7 +358,8 @@ public class DeviceActivity extends BaseActivity {
     }
 
     private void startPPG() {
-        device.startPPG(error -> {
+        device.startPPG(PPGSampleRate.SR1, error -> {
+//        device.startPPG(PPGSampleRate.SR25, error -> {
             if (error != null) {
                 Log.i(TAG, "startPPG:" + error.getCode() + ", message=" + error.getMessage());
             } else {
