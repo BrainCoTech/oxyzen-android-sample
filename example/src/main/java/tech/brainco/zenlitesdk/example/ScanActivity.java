@@ -1,0 +1,190 @@
+package tech.brainco.zenlitesdk.example;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import tech.brainco.zenlitesdk.ZenLiteDevice;
+import tech.brainco.zenlitesdk.ZenLiteDeviceScanListener;
+import tech.brainco.zenlitesdk.ZenLiteError;
+import tech.brainco.zenlitesdk.ZenLitePermissions;
+import tech.brainco.zenlitesdk.ZenLiteSDK;
+
+public class ScanActivity extends BaseActivity {
+    private final String TAG = "ScanActivity";
+    private List<ZenLiteDevice> devices = new ArrayList<>();
+    private DeviceListAdapter deviceListAdapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scan);
+
+        RecyclerView deviceListView = findViewById(R.id.device_list);
+        deviceListView.setHasFixedSize(true);
+        deviceListAdapter = new DeviceListAdapter(this);
+        deviceListView.setAdapter(deviceListAdapter);
+        deviceListView.setLayoutManager(new LinearLayoutManager(this));
+
+        ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
+        ZenLiteSDK.registerBLEStateReceiver(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        ZenLiteSDK.unregisterBLEStateReceiver(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_scan, menu);
+        return true;
+    }
+
+    private void scanDevices() {
+        if (ZenLiteSDK.isScanning) {
+            dismissLoadingDialog();
+            ZenLiteSDK.stopScan();
+            return;
+        }
+
+        if (!ZenLitePermissions.checkBluetoothFeature(this)) {
+            showMessage("BLE not supported");
+            return;
+        }
+
+        BluetoothAdapter adapter = ((BluetoothManager) this.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        if (adapter == null || !adapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            this.startActivity(enableBtIntent);
+            return;
+        }
+
+        // bluetooth & location Permission
+        if (!ZenLitePermissions.checkPermissions(this)) {
+            ZenLitePermissions.requestPermissions(this);
+            return;
+        }
+
+        showLoadingDialog();
+        ZenLiteSDK.startScan(new ZenLiteDeviceScanListener() {
+            @Override
+            public void onBluetoothAdapterStateChange(int state) {
+                Log.i(TAG, "BluetoothAdapter state=" + state);
+                switch (state) {
+                    case BluetoothAdapter.STATE_ON:
+                        // restart scan
+                        scanDevices();
+                        break;
+                    case BluetoothAdapter.STATE_OFF:
+                        ZenLiteSDK.stopScan();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onFoundDevices(List<ZenLiteDevice> results) {
+                if (!results.isEmpty())
+                    dismissLoadingDialog();
+
+                // TODO: removeAll scan results which not in pairing mode and not exists paired success record
+                devices = results;
+                deviceListAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(ZenLiteError error) {
+                dismissLoadingDialog();
+                showMessage(error.getMessage());
+            }
+        }, null);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_scan_device) {
+            scanDevices();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public static class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.DeviceViewHolder> {
+        private final ScanActivity context;
+
+        static class DeviceViewHolder extends RecyclerView.ViewHolder {
+            // each data item is just a string in this case
+            TextView nameTextView;
+            TextView idTextView;
+
+            DeviceViewHolder(View view) {
+                super(view);
+                nameTextView = view.findViewById(R.id.item_device_info_name);
+                idTextView = view.findViewById(R.id.item_device_info_id);
+            }
+        }
+
+        // Provide a suitable constructor (depends on the kind of dataset)
+        DeviceListAdapter(ScanActivity context) {
+            this.context = context;
+        }
+
+        @SuppressLint("InflateParams")
+        @NonNull
+        @Override
+        public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_device_info, null);
+            view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
+                    RecyclerView.LayoutParams.WRAP_CONTENT));
+            return new DeviceViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(DeviceViewHolder holder, int position) {
+            holder.nameTextView.setText(context.devices.get(position).getName());
+            holder.idTextView.setText(context.devices.get(position).getId());
+
+            final ZenLiteDevice device = context.devices.get(position);
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, MenuActivity.class);
+                // intent.putExtra("deviceId", device.getId());
+
+                ZenLiteSDK.stopScan();
+                setSelectedZenLiteDevice(device);
+                context.startActivity(intent);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return context.devices.size();
+        }
+    }
+}
