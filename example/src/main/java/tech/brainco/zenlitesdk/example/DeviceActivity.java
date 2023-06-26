@@ -241,9 +241,7 @@ public class DeviceActivity extends BaseActivity {
 
         @Override
         public void onPPGData(PPG ppg) {
-//            if (ppg.algo_data != null) Log.i(TAG, "hr=" + ppg.algo_data.hr +  " spo2=" + ppg.algo_data.spo2);
-            Log.i(TAG, ppg.toString());
-//            ppgDataText.setText(ppg.toString());
+            Log.i(TAG, "onPPGData, seq_num=" + ppg.sequence_num);
         }
 
         @Override
@@ -319,7 +317,8 @@ public class DeviceActivity extends BaseActivity {
         });
     }
 
-    public void shutDownClick() {}
+    public void shutDownClick() {
+    }
 
     @SuppressLint("SetTextI18n")
     private void startEEG() {
@@ -358,7 +357,7 @@ public class DeviceActivity extends BaseActivity {
     }
 
     private void startPPG() {
-        device.startPPG(PPGSampleRate.SR1, error -> {
+        device.startPPG(PPGSampleRate.SR25, error -> {
 //        device.startPPG(PPGSampleRate.SR25, error -> {
             if (error != null) {
                 Log.i(TAG, "startPPG:" + error.getCode() + ", message=" + error.getMessage());
