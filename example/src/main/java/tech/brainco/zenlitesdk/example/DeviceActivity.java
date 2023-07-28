@@ -270,12 +270,9 @@ public class DeviceActivity extends BaseActivity {
         }
 
         @Override
-        public void onCalmness(float value) {
-            deviceCalmnessText.setText(String.valueOf(value));
-        }
-
-        @Override
-        public void onMeditation(float meditation) {
+        public void onMeditation(float meditation, float calmness, float awareness) {
+            Log.i(TAG, "onMeditation, meditation=" + meditation + ", calmness=" + calmness + ", awareness=" + awareness);
+            deviceCalmnessText.setText(String.valueOf(calmness));
             deviceMeditationText.setText(String.valueOf(meditation));
         }
     }
