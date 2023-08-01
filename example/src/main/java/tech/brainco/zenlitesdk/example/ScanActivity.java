@@ -44,7 +44,7 @@ public class ScanActivity extends BaseActivity {
         deviceListAdapter = new DeviceListAdapter(this);
         deviceListView.setAdapter(deviceListAdapter);
         deviceListView.setLayoutManager(new LinearLayoutManager(this));
-
+        ZenLiteSDK.setTFLiteDisabled(true);
         ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
         ZenLiteSDK.registerBLEStateReceiver(this);
     }
