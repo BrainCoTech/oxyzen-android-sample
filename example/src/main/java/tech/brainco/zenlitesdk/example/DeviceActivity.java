@@ -76,6 +76,8 @@ public class DeviceActivity extends BaseActivity {
         DeviceListener listener = new DeviceListener();
 
         device = getSelectedZenLiteDevice();
+        final int rssi = device.getRssi();
+        Log.i(TAG, "BLE device rssi: " + rssi);
 
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
@@ -267,6 +269,11 @@ public class DeviceActivity extends BaseActivity {
                     wave.getHighBeta()));
             deviceGamma.setText(String.format(Locale.getDefault(), "%.3f",
                     wave.getGamma()));
+        }
+
+        @Override
+        public void onAttention(float attention, float weighted_attention) {
+            Log.i(TAG, "onAttention, attention=" + attention + ", weighted_attention=" + weighted_attention);
         }
 
         @Override
