@@ -37,7 +37,7 @@ android {
 
 dependencies {
     // maven import
-    api 'tech.brainco:zenlitesdk:0.11.3'
+    api 'tech.brainco:zenlitesdk:0.11.4'
 
     // other dependencies
     implementation 'no.nordicsemi.android:ble:2.6.1'
