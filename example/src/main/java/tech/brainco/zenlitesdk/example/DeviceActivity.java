@@ -276,6 +276,21 @@ public class DeviceActivity extends BaseActivity {
             deviceCalmnessText.setText(String.valueOf(calmness));
             deviceMeditationText.setText(String.valueOf(meditation));
         }
+
+        @Override
+        public void onStress(float stress) {
+            Log.i(TAG, "onStress, stress=" + stress);
+        }
+
+        @Override
+        public void onEyeMovement(float eyeMovement) {
+            Log.i(TAG, "onEyeMovement, eyeMovement=" + eyeMovement);
+        }
+
+        @Override
+        public void onSleep(int stage, float conf, float drowsiness) {
+            Log.i(TAG, "onSleep, stage=" + stage + ", conf=" + conf + ", drowsiness=" + drowsiness);
+        }
     }
 
     @SuppressLint("SetTextI18n")
