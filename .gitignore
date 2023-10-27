@@ -5,3 +5,4 @@
 /captures
 .externalNativeBuild
 *.aar
+example/src/main/res/layout/.idea

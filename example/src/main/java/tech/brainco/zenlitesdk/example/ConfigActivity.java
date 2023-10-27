@@ -107,24 +107,18 @@ public class ConfigActivity extends BaseActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_device_connect: {
-                device.connect(this);
-                break;
-            }
-            case R.id.action_device_disconnect: {
-                device.disconnect();
-                break;
-            }
-            case R.id.action_shut_down: {
-                shutDownClick();
-                Toast.makeText(getApplicationContext(), "shutting down device...", Toast.LENGTH_SHORT).show();
-                Intent myIntent = new Intent(ConfigActivity.this, ScanActivity.class);
-                ConfigActivity.this.startActivity(myIntent);
-                break;
-            }
-            default:
-                Log.d("SearchHeadbandsActivity", "Unknown action");
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_device_connect) {
+            device.connect(this);
+        } else if (itemId == R.id.action_device_disconnect) {
+            device.disconnect();
+        } else if (itemId == R.id.action_shut_down) {
+            shutDownClick();
+            Toast.makeText(getApplicationContext(), "shutting down device...", Toast.LENGTH_SHORT).show();
+            Intent myIntent = new Intent(ConfigActivity.this, ScanActivity.class);
+            ConfigActivity.this.startActivity(myIntent);
+        } else {
+            Log.d("SearchHeadbandsActivity", "Unknown action");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -242,41 +236,11 @@ public class ConfigActivity extends BaseActivity {
 
     }
 
-    public void redClick(View v) {
-//        if (device.isConnected()) {
-//            device.setLEDColor(255, 0, 0, error -> {
-//                if (error != null) {
-//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:red: " + error.getMessage());
-//                }
-//            });
-//        } else {
-//            deviceNotConnectedAlert();
-//        }
-    }
+    public void redClick(View v) {}
 
-    public void greenClick(View v) {
-//        if (device.isConnected()) {
-//            device.setLEDColor(0, 255, 0, error -> {
-//                if (error != null) {
-//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:green: " + error.getMessage());
-//                }
-//            });
-//        } else {
-//            deviceNotConnectedAlert();
-//        }
-    }
+    public void greenClick(View v) {}
 
-    public void blueClick(View v) {
-//        if (device.isConnected()) {
-//            device.setLEDColor(0, 0, 255, error -> {
-//                if (error != null) {
-//                    Log.i("setLEDColor:" + error.getCode(), "setLEDColor:blue: " + error.getMessage());
-//                }
-//            });
-//        } else {
-//            deviceNotConnectedAlert();
-//        }
-    }
+    public void blueClick(View v) {}
 
     public void shutDownClick() {
         if (device.isConnected()) {

@@ -1,12 +1,12 @@
 package tech.brainco.zenlitesdk.example;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,7 +78,7 @@ public class ScanActivity extends BaseActivity {
         BluetoothAdapter adapter = ((BluetoothManager) this.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
         if (adapter == null || !adapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             this.startActivity(enableBtIntent);
@@ -144,10 +144,15 @@ public class ScanActivity extends BaseActivity {
             TextView nameTextView;
             TextView idTextView;
 
+            TextView inPairingTextView;
+            TextView rssiTextView;
+
             DeviceViewHolder(View view) {
                 super(view);
                 nameTextView = view.findViewById(R.id.item_device_info_name);
                 idTextView = view.findViewById(R.id.item_device_info_id);
+                inPairingTextView = view.findViewById(R.id.item_inPairingMode);
+                rssiTextView = view.findViewById(R.id.item_rssi);
             }
         }
 
@@ -168,16 +173,15 @@ public class ScanActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(DeviceViewHolder holder, int position) {
-            holder.nameTextView.setText(context.devices.get(position).getName());
-            holder.idTextView.setText(context.devices.get(position).getId());
-
             final ZenLiteDevice device = context.devices.get(position);
+            holder.nameTextView.setText(device.getName());
+            holder.idTextView.setText(device.getId());
+            holder.rssiTextView.setText(String.valueOf(device.getRssi()));
+            holder.inPairingTextView.setText(device.inPairingMode() ? "配对模式" : "普通模式");
             holder.itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(context, MenuActivity.class);
-                // intent.putExtra("deviceId", device.getId());
-
                 ZenLiteSDK.stopScan();
                 setSelectedZenLiteDevice(device);
+                Intent intent = new Intent(context, DeviceActivity.class);
                 context.startActivity(intent);
             });
         }

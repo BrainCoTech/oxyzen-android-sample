@@ -141,24 +141,18 @@ public class DeviceActivity extends BaseActivity {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_device_connect: {
-                device.connect(this);
-                break;
-            }
-            case R.id.action_device_disconnect: {
-                device.disconnect();
-                break;
-            }
-            case R.id.action_shut_down: {
-                shutDownClick();
-                Toast.makeText(getApplicationContext(), "shutting down device...", Toast.LENGTH_SHORT).show();
-                Intent myIntent = new Intent(DeviceActivity.this, ScanActivity.class);
-                DeviceActivity.this.startActivity(myIntent);
-                break;
-            }
-            default:
-                Log.d("SearchHeadbandsActivity", "Unknown action");
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_device_connect) {
+            device.connect(this);
+        } else if (itemId == R.id.action_device_disconnect) {
+            device.disconnect();
+        } else if (itemId == R.id.action_shut_down) {
+            shutDownClick();
+            Toast.makeText(getApplicationContext(), "shutting down device...", Toast.LENGTH_SHORT).show();
+            Intent myIntent = new Intent(DeviceActivity.this, ScanActivity.class);
+            DeviceActivity.this.startActivity(myIntent);
+        } else {
+            Log.d("SearchHeadbandsActivity", "Unknown action");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -392,7 +386,6 @@ public class DeviceActivity extends BaseActivity {
                     }, (device, status) -> {
                         Log.i(TAG, "on read rssi failed, status=" + status);
                     });
-
                 } else {
                     pairing = true;
                     devicePairButton.setText("Pairing");

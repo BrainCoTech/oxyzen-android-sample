@@ -12,7 +12,6 @@ public class MenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
     }
 
     public void deviceFeaturesClick(View v) {
@@ -20,8 +19,7 @@ public class MenuActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void otaFeaturesClick(View v) {
-    }
+    public void otaFeaturesClick(View v) {}
 
     public void deviceConfigClick(View v) {
         Intent intent = new Intent(this, ConfigActivity.class);
