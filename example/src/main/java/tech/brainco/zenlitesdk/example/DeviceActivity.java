@@ -3,7 +3,6 @@ package tech.brainco.zenlitesdk.example;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -15,7 +14,6 @@ import androidx.appcompat.app.ActionBar;
 import java.util.Arrays;
 import java.util.Locale;
 
-import tech.brainco.zenlitejna.bridge.OnLogCallback;
 import tech.brainco.zenlitesdk.BrainWave;
 import tech.brainco.zenlitesdk.DFUCallback;
 import tech.brainco.zenlitesdk.DeviceInfo;
@@ -72,13 +70,15 @@ public class DeviceActivity extends BaseActivity {
         setupViews();
         DeviceListener listener = new DeviceListener();
 
-        device = getSelectedZenLiteDevice();
-
+        /*
         ZenLiteSDK.setLogCallback(new OnLogCallback()  {
             public void invoke(String msg) {
-                // TODO: saveLogMessageToFile(msg);
+                //  TODO: saveLogMessageToFile(msg);
             }
         });
+        */
+
+        device = getSelectedZenLiteDevice();
         final int rssi = device.getRssi();
         ZenLiteSDK.logI(TAG, "BLE device rssi: " + rssi);
 
@@ -236,21 +236,21 @@ public class DeviceActivity extends BaseActivity {
 
         @Override
         public void onIMUData(IMU imu) {
-            ZenLiteSDK.logI(TAG, "onIMUData, seq_num=" + imu.acc_data.sequence_num);
+            ZenLiteSDK.logD(TAG, "onIMUData, seq_num=" + imu.acc_data.sequence_num);
             imuDataText.setText(imu.toString());
         }
 
         @Override
         public void onPPGData(PPG ppg) {
-            ZenLiteSDK.logI(TAG, "onPPGData, seq_num=" + ppg.sequence_num);
+            ZenLiteSDK.logD(TAG, "onPPGData, seq_num=" + ppg.sequence_num);
         }
 
         @Override
         public void onEEGData(EEG eeg) {
             if (eeg.getEEGData().length != 30) {
-                ZenLiteSDK.logI(TAG, "onEEGData, seq_num=" + eeg.getSequenceNumber() + ", len=" + eeg.getEEGData().length);
+                ZenLiteSDK.logD(TAG, "onEEGData, seq_num=" + eeg.getSequenceNumber() + ", len=" + eeg.getEEGData().length);
             } else {
-                ZenLiteSDK.logI(TAG, "onEEGData, seq_num=" + eeg.getSequenceNumber());
+                ZenLiteSDK.logD(TAG, "onEEGData, seq_num=" + eeg.getSequenceNumber());
             }
             eegMetaDataText.setText(String.format(Locale.getDefault(), "SN:%d SR:%.1f",
                     eeg.getSequenceNumber(),
@@ -288,17 +288,17 @@ public class DeviceActivity extends BaseActivity {
 
         @Override
         public void onStress(float stress) {
-            ZenLiteSDK.logI(TAG, "onStress, stress=" + stress);
+            ZenLiteSDK.logD(TAG, "onStress, stress=" + stress);
         }
 
         @Override
         public void onEyeMovement(float eyeMovement) {
-            ZenLiteSDK.logI(TAG, "onEyeMovement, eyeMovement=" + eyeMovement);
+            ZenLiteSDK.logD(TAG, "onEyeMovement, eyeMovement=" + eyeMovement);
         }
 
         @Override
         public void onSleep(int stage, float conf, float drowsiness) {
-            ZenLiteSDK.logI(TAG, "onSleep, stage=" + stage + ", conf=" + conf + ", drowsiness=" + drowsiness);
+            ZenLiteSDK.logD(TAG, "onSleep, stage=" + stage + ", conf=" + conf + ", drowsiness=" + drowsiness);
         }
     }
 
@@ -306,12 +306,8 @@ public class DeviceActivity extends BaseActivity {
     public void dataStreamClick() {
         if (deviceDataStreamButton.getText().toString().equals("Start")) {
             startEEG();
-            startIMU();
-            startPPG();
         } else {
             stopEEG();
-            stopIMU();
-            stopPPG();
         }
     }
 
@@ -344,26 +340,38 @@ public class DeviceActivity extends BaseActivity {
 
     @SuppressLint("SetTextI18n")
     private void startEEG() {
+        deviceDataStreamButton.setEnabled(false);
         device.startEEG(error -> {
             if (error != null) {
                 ZenLiteSDK.logI(TAG, "startEEG:" + error.getCode() + ", message=" + error.getMessage());
+                deviceDataStreamButton.setEnabled(true);
             } else {
                 ZenLiteSDK.logI(TAG, "startEEG success");
-                deviceDataStreamButton.setText("Stop");
+                startIMU();
             }
         });
     }
 
     private void stopEEG() {
-        device.stopEEG(null);
+        deviceDataStreamButton.setEnabled(false);
+        device.stopEEG(error -> {
+            if (error != null) {
+                ZenLiteSDK.logI(TAG, "stopEEG:" + error.getCode() + ", message=" + error.getMessage());
+            } else {
+                ZenLiteSDK.logI(TAG, "stopEEG success");
+            }
+            stopIMU();
+        });
     }
 
     private void startIMU() {
         device.startIMU(error -> {
             if (error != null) {
                 ZenLiteSDK.logI(TAG, "startIMU:" + error.getCode() + ", message=" + error.getMessage());
+                deviceDataStreamButton.setEnabled(true);
             } else {
                 ZenLiteSDK.logI(TAG, "startIMU success");
+                startPPG();
             }
         });
     }
@@ -375,6 +383,7 @@ public class DeviceActivity extends BaseActivity {
             } else {
                 ZenLiteSDK.logI(TAG, "stopIMU success");
             }
+            stopPPG();
         });
     }
 
@@ -384,7 +393,9 @@ public class DeviceActivity extends BaseActivity {
                 ZenLiteSDK.logI(TAG, "startPPG:" + error.getCode() + ", message=" + error.getMessage());
             } else {
                 ZenLiteSDK.logI(TAG, "startPPG success");
+                deviceDataStreamButton.setText("Stop");
             }
+            deviceDataStreamButton.setEnabled(true);
         });
     }
 
@@ -395,6 +406,8 @@ public class DeviceActivity extends BaseActivity {
             } else {
                 ZenLiteSDK.logI(TAG, "stopPPG success");
             }
+            deviceDataStreamButton.setText("Start");
+            deviceDataStreamButton.setEnabled(true);
         });
     }
 
