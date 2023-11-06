@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +24,7 @@ import tech.brainco.zenlitesdk.ZenLiteDeviceListener;
 import tech.brainco.zenlitesdk.ZenLiteSDK;
 
 public class ConfigActivity extends BaseActivity {
+    private static final String TAG = "ConfigActivity";
 
     private ZenLiteDevice device = null;
 
@@ -118,7 +118,7 @@ public class ConfigActivity extends BaseActivity {
             Intent myIntent = new Intent(ConfigActivity.this, ScanActivity.class);
             ConfigActivity.this.startActivity(myIntent);
         } else {
-            Log.d("SearchHeadbandsActivity", "Unknown action");
+            ZenLiteSDK.logW(TAG, "Unknown action");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -145,7 +145,7 @@ public class ConfigActivity extends BaseActivity {
 
         @Override
         public void onIMUData(IMU data) {
-            Log.d(ConfigActivity.class.getSimpleName(), data.toString());
+            ZenLiteSDK.logI(ConfigActivity.class.getSimpleName(), data.toString());
         }
 
         @Override
@@ -164,11 +164,11 @@ public class ConfigActivity extends BaseActivity {
                 Toast.makeText(getApplicationContext(), "sending AFE configuration...", Toast.LENGTH_SHORT).show();
                 device.startEEG(error -> {
                     if (error != null) {
-                        Log.d(ConfigActivity.class.getSimpleName(), error.toString());
+                        ZenLiteSDK.logI(ConfigActivity.class.getSimpleName(), error.toString());
                     }
                 });
             } catch (Exception e) {
-                Log.i("Error", e.getMessage());
+                ZenLiteSDK.logI("Error", e.getMessage());
             }
         } else {
             deviceNotConnectedAlert();
@@ -181,11 +181,11 @@ public class ConfigActivity extends BaseActivity {
                 Toast.makeText(getApplicationContext(), "sending ACC configuration...", Toast.LENGTH_SHORT).show();
                 device.startIMU(error -> {
                     if (error != null) {
-                        Log.d(ConfigActivity.class.getSimpleName(), error.toString());
+                        ZenLiteSDK.logI(ConfigActivity.class.getSimpleName(), error.toString());
                     }
                 });
             } catch (Exception e) {
-                Log.i("Error", e.getMessage());
+                ZenLiteSDK.logI("Error", e.getMessage());
             }
         } else {
             deviceNotConnectedAlert();
@@ -223,9 +223,10 @@ public class ConfigActivity extends BaseActivity {
                 return;
             }
 
+            //device.setDeviceName("Oxyz-Yongle", null);
             device.setDeviceName(deviceNewName, error -> {
                 if (error != null) {
-                    Log.i("setDeviceName:" + error.getCode(), "setDeviceName " + error.getMessage());
+                    ZenLiteSDK.logI(TAG, "setDeviceName " + error.getCode() + error.getMessage());
                 }
             });
 

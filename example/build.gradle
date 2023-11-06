@@ -34,14 +34,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-//    kotlinOptions {
-//        jvmTarget = JavaVersion.VERSION_17.toString()
-//    }
 }
 
 dependencies {
     // maven import
-    api 'tech.brainco:zenlitesdk:0.11.6'
+    api 'tech.brainco:zenlitesdk:0.13.0'
 
     // AAR import dependencies
     implementation 'no.nordicsemi.android:ble-ktx:2.7.2'

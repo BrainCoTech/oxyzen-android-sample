@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,7 +84,7 @@ public class ScanActivity extends BaseActivity {
             return;
         }
 
-        // bluetooth & location Permission
+        // check Permissions
         if (!ZenLitePermissions.checkPermissions(this)) {
             ZenLitePermissions.requestPermissions(this);
             return;
@@ -95,7 +94,7 @@ public class ScanActivity extends BaseActivity {
         ZenLiteSDK.startScan(new ZenLiteDeviceScanListener() {
             @Override
             public void onBluetoothAdapterStateChange(int state) {
-                Log.i(TAG, "BluetoothAdapter state=" + state);
+                ZenLiteSDK.logI(TAG, "BluetoothAdapter state=" + state);
                 switch (state) {
                     case BluetoothAdapter.STATE_ON:
                         // restart scan
@@ -131,6 +130,8 @@ public class ScanActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_scan_device) {
+            devices.clear();
+            deviceListAdapter.notifyDataSetChanged();
             scanDevices();
         }
         return super.onOptionsItemSelected(item);
@@ -183,6 +184,9 @@ public class ScanActivity extends BaseActivity {
                 setSelectedZenLiteDevice(device);
                 Intent intent = new Intent(context, DeviceActivity.class);
                 context.startActivity(intent);
+                // clear scan results
+                context.devices.clear();
+                context.deviceListAdapter.notifyDataSetChanged();
             });
         }
 
