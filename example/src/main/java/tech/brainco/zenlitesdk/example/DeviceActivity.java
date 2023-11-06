@@ -417,11 +417,11 @@ public class DeviceActivity extends BaseActivity {
             if (!pairing) {
                 if (paired) {
                     showShortMessage("Already paired");
-                    device.readRssi((device, rssi) -> {
-                        ZenLiteSDK.logI(TAG, "on read rssi=" + rssi);
-                    }, (device, status) -> {
-                        ZenLiteSDK.logI(TAG, "on read rssi failed, status=" + status);
-                    });
+//                    device.readRssi((device, rssi) -> {
+//                        ZenLiteSDK.logI(TAG, "on read rssi=" + rssi);
+//                    }, (device, status) -> {
+//                        ZenLiteSDK.logI(TAG, "on read rssi failed, status=" + status);
+//                    });
                 } else {
                     pairing = true;
                     devicePairButton.setText("Pairing");

@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "tech.brainco.zenlitesdk.example"
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
         applicationId "tech.brainco.zenlitesdk.example"
         minSdk 21
-        targetSdk 34
+        targetSdk 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,22 +31,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+//        sourceCompatibility JavaVersion.VERSION_17
+//        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     // maven import
-    api 'tech.brainco:zenlitesdk:0.13.1'
-
-    // AAR import dependencies
-    implementation 'no.nordicsemi.android:ble-ktx:2.7.2'
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
-    implementation 'no.nordicsemi.android:dfu:2.3.1'
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
-    implementation 'androidx.startup:startup-runtime:1.1.1'
-    api 'net.java.dev.jna:jna:5.13.0@aar'
+    api 'tech.brainco:zenlitesdk:0.13.6'
 
     // other dependencies
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
