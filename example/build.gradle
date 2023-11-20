@@ -32,19 +32,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['zenlitejna-release.aar', 'zenlitesdk-release.aar'])
-
-    // sdk dependencies
-    implementation 'no.nordicsemi.android:ble:2.7.2'
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
-    implementation 'no.nordicsemi.android:dfu:2.3.2'
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
-    implementation 'androidx.startup:startup-runtime:1.1.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.12.0'
-    api 'net.java.dev.jna:jna:5.13.0@aar'
+    api 'tech.brainco:zenlitesdk:1.0.0' // import from maven
 
     // other dependencies
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
