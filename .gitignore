@@ -6,3 +6,4 @@
 .externalNativeBuild
 *.aar
 example/src/main/res/layout/.idea
+*.zip

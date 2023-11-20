@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +48,7 @@ public class ScanActivity extends BaseActivity {
         ZenLiteSDK.setTFLiteDisabled(true);
         ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
         ZenLiteSDK.registerBLEStateReceiver(this);
+        Log.i(TAG, "SdkVersion: " + ZenLiteSDK.getSdkVersion());
     }
 
     @Override
