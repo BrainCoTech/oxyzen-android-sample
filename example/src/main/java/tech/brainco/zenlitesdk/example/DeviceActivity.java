@@ -283,12 +283,12 @@ public class DeviceActivity extends BaseActivity {
         public void onMeditation(float meditation, float calmness, float awareness) {
             ZenLiteSDK.logI(TAG, "onMeditation, meditation=" + meditation + ", calmness=" + calmness + ", awareness=" + awareness);
             deviceCalmnessText.setText(String.valueOf(calmness));
+            deviceMeditationText.setText(String.valueOf(meditation));
         }
 
         @Override
         public void onRelaxation(float relaxation) {
             ZenLiteSDK.logI(TAG, "onRelaxation, relaxation=" + relaxation);
-            deviceMeditationText.setText(String.valueOf(relaxation));
         }
 
         @Override
