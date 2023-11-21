@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "tech.brainco.zenlitesdk.example"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -32,7 +32,7 @@ android {
 }
 
 dependencies {
-    api 'tech.brainco:zenlitesdk:1.0.0' // import from maven
+    api 'tech.brainco:zenlitesdk:1.0.4' // import from maven
 
     // other dependencies
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'

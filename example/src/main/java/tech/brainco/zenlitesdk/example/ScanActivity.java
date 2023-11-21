@@ -48,7 +48,7 @@ public class ScanActivity extends BaseActivity {
         ZenLiteSDK.setTFLiteDisabled(true);
         ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
         ZenLiteSDK.registerBLEStateReceiver(this);
-//        Log.i(TAG, "SdkVersion: " + ZenLiteSDK.getSdkVersion());
+        Log.i(TAG, "OxyZenSDK Version: " + ZenLiteSDK.getSdkVersion());
     }
 
     @Override
