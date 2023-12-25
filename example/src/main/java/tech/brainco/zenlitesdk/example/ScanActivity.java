@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -90,6 +91,10 @@ public class ScanActivity extends BaseActivity {
             ZenLitePermissions.requestPermissions(this);
             return;
         }
+        if (!isLocationServiceEnabled(this)) {
+            showMessage("Please enable location service");
+            return;
+        }
 
         showLoadingDialog();
         ZenLiteSDK.startScan(new ZenLiteDeviceScanListener() {
@@ -126,6 +131,14 @@ public class ScanActivity extends BaseActivity {
                 showMessage(error.getMessage());
             }
         }, null);
+    }
+
+    public boolean isLocationServiceEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager != null) {
+            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+        return false;
     }
 
     @Override
