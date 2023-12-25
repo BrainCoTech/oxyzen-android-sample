@@ -287,6 +287,11 @@ public class DeviceActivity extends BaseActivity {
         }
 
         @Override
+        public void onStableAttention(float attention) {
+            ZenLiteSDK.logI(TAG, "onStableAttention, attention=" + attention);
+        }
+
+        @Override
         public void onRelaxation(float relaxation) {
             ZenLiteSDK.logI(TAG, "onRelaxation, relaxation=" + relaxation);
         }
