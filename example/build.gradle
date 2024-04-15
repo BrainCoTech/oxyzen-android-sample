@@ -32,7 +32,15 @@ android {
 }
 
 dependencies {
-    api "tech.brainco:zenlitesdk:$zl_sdk_version" // import from maven
+    implementation fileTree(dir: 'libs', include: ['zenlite*-release.aar'])
+
+    // sdk dependencies
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
+    implementation 'no.nordicsemi.android:ble:2.7.4'
+    implementation 'no.nordicsemi.android:dfu:2.4.2'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api 'net.java.dev.jna:jna:5.14.0@aar'
 
     // other dependencies
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
