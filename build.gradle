@@ -3,7 +3,7 @@
 buildscript {
     ext {
         kotlin_version = '1.9.23'
-        zl_sdk_version = '1.2.2'
+        zl_sdk_version = '1.2.3'
     }
     repositories {
         google()

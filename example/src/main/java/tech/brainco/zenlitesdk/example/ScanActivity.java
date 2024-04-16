@@ -186,6 +186,7 @@ public class ScanActivity extends BaseActivity {
             return new DeviceViewHolder(view);
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onBindViewHolder(DeviceViewHolder holder, int position) {
             final ZenLiteDevice device = context.devices.get(position);
