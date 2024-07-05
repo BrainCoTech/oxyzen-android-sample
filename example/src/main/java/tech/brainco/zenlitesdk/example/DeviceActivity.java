@@ -1,8 +1,11 @@
 package tech.brainco.zenlitesdk.example;
 
+import static android.util.Log.println;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -14,6 +17,7 @@ import androidx.appcompat.app.ActionBar;
 import java.util.Arrays;
 import java.util.Locale;
 
+import tech.brainco.zenlitejna.bridge.OnLogCallback;
 import tech.brainco.zenlitesdk.BrainWave;
 import tech.brainco.zenlitesdk.DFUCallback;
 import tech.brainco.zenlitesdk.DeviceInfo;
@@ -70,13 +74,19 @@ public class DeviceActivity extends BaseActivity {
         setupViews();
         DeviceListener listener = new DeviceListener();
 
-        /*
+        // disable log
+        ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.NONE);
+
+        // set log level
+        ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
+
+        // if you want to record and debug, you can use setLogCallback and save log message
         ZenLiteSDK.setLogCallback(new OnLogCallback()  {
-            public void invoke(String msg) {
-                //  TODO: saveLogMessageToFile(msg);
+            public void invoke(String message) {
+                // TODO: saveLogMessage(message);
+                println(Log.INFO, null, message);
             }
         });
-        */
 
         device = getSelectedZenLiteDevice();
         final int rssi = device.getRssi();
@@ -221,8 +231,8 @@ public class DeviceActivity extends BaseActivity {
         @Override
         public void onContactStateChange(ZenLiteSDK.ContactState state) {
             ZenLiteSDK.logI(TAG, "ContactState=" + state);
-            if (state.isContacted())
-                deviceContactStateText.setText("Contacted");
+            if (state.isPPGContacted()) deviceContactStateText.setText("Contacted");
+            else if (state.isEEGContacted()) deviceContactStateText.setText("EEG Contacted");
             else if (state == ZenLiteSDK.ContactState.OFF)
                 deviceContactStateText.setText("LeadOff");
             else if (state == ZenLiteSDK.ContactState.UNKNOWN)
@@ -252,58 +262,24 @@ public class DeviceActivity extends BaseActivity {
             } else {
                 ZenLiteSDK.logD(TAG, "onEEGData, seq_num=" + eeg.getSequenceNumber());
             }
-            eegMetaDataText.setText(String.format(Locale.getDefault(), "SN:%d SR:%.1f",
-                    eeg.getSequenceNumber(),
-                    eeg.getSampleRate()));
+            eegMetaDataText.setText(String.format(Locale.getDefault(), "SN:%d SR:%.1f", eeg.getSequenceNumber(), eeg.getSampleRate()));
             eegDataText.setText(Arrays.toString(eeg.getEEGData()));
         }
 
         @Override
         public void onBrainWave(BrainWave wave) {
-            deviceDelta.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getDelta()));
-            deviceTheta.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getTheta()));
-            deviceAlpha.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getAlpha()));
-            deviceLowBeta.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getLowBeta()));
-            deviceHighBeta.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getHighBeta()));
-            deviceGamma.setText(String.format(Locale.getDefault(), "%.3f",
-                    wave.getGamma()));
-        }
-
-        @Override
-        public void onAttention(float attention, float weighted_attention) {
-            ZenLiteSDK.logI(TAG, "onAttention, attention=" + attention + ", weighted_attention=" + weighted_attention);
+            deviceDelta.setText(String.format(Locale.getDefault(), "%.3f", wave.getDelta()));
+            deviceTheta.setText(String.format(Locale.getDefault(), "%.3f", wave.getTheta()));
+            deviceAlpha.setText(String.format(Locale.getDefault(), "%.3f", wave.getAlpha()));
+            deviceLowBeta.setText(String.format(Locale.getDefault(), "%.3f", wave.getLowBeta()));
+            deviceHighBeta.setText(String.format(Locale.getDefault(), "%.3f", wave.getHighBeta()));
+            deviceGamma.setText(String.format(Locale.getDefault(), "%.3f", wave.getGamma()));
         }
 
         @Override
         public void onMeditation(float meditation, float calmness, float awareness) {
-            ZenLiteSDK.logI(TAG, "onMeditation, meditation=" + meditation + ", calmness=" + calmness + ", awareness=" + awareness);
             deviceCalmnessText.setText(String.valueOf(calmness));
             deviceMeditationText.setText(String.valueOf(meditation));
-        }
-
-        @Override
-        public void onStableAttention(float attention) {
-            ZenLiteSDK.logI(TAG, "onStableAttention, attention=" + attention);
-        }
-
-        @Override
-        public void onRelaxation(float relaxation) {
-            ZenLiteSDK.logI(TAG, "onRelaxation, relaxation=" + relaxation);
-        }
-
-        @Override
-        public void onStress(float stress) {
-            ZenLiteSDK.logD(TAG, "onStress, stress=" + stress);
-        }
-
-        @Override
-        public void onEyeMovement(float eyeMovement) {
-            ZenLiteSDK.logD(TAG, "onEyeMovement, eyeMovement=" + eyeMovement);
         }
 
         @Override
@@ -346,6 +322,16 @@ public class DeviceActivity extends BaseActivity {
     }
 
     public void shutDownClick() {
+    }
+
+    private void setSleepIdleTime() {
+        device.setSleepIdleTime(900, error -> {
+            if (error != null) {
+                ZenLiteSDK.logI(TAG, "setSleepIdleTime " + error.getCode() + error.getMessage());
+            } else {
+                ZenLiteSDK.logI(TAG, "setSleepIdleTime success");
+            }
+        });
     }
 
     @SuppressLint("SetTextI18n")
@@ -427,11 +413,6 @@ public class DeviceActivity extends BaseActivity {
             if (!pairing) {
                 if (paired) {
                     showShortMessage("Already paired");
-//                    device.readRssi((device, rssi) -> {
-//                        ZenLiteSDK.logI(TAG, "on read rssi=" + rssi);
-//                    }, (device, status) -> {
-//                        ZenLiteSDK.logI(TAG, "on read rssi failed, status=" + status);
-//                    });
                 } else {
                     pairing = true;
                     devicePairButton.setText("Pairing");

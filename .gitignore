@@ -9,3 +9,5 @@ example/src/main/res/layout/.idea
 *.zip
 deploymentTargetDropDown.xml
 gradle.xml
+VERSION
+migrations.xml

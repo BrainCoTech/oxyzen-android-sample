@@ -2,14 +2,12 @@ package tech.brainco.zenlitesdk.example;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,16 +23,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import tech.brainco.zenlitesdk.DeviceInfo;
 import tech.brainco.zenlitesdk.ZenLiteDevice;
+import tech.brainco.zenlitesdk.ZenLiteDeviceListener;
 import tech.brainco.zenlitesdk.ZenLiteDeviceScanListener;
 import tech.brainco.zenlitesdk.ZenLiteError;
 import tech.brainco.zenlitesdk.ZenLitePermissions;
 import tech.brainco.zenlitesdk.ZenLiteSDK;
 
 public class ScanActivity extends BaseActivity {
-    private final String TAG = "ScanActivity";
+    private static final String TAG = "ScanActivity";
     private List<ZenLiteDevice> devices = new ArrayList<>();
     private DeviceListAdapter deviceListAdapter;
+
+    private final boolean connectDirectly = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,6 @@ public class ScanActivity extends BaseActivity {
         deviceListView.setLayoutManager(new LinearLayoutManager(this));
         ZenLiteSDK.setLogLevel(ZenLiteSDK.LogLevel.INFO);
         ZenLiteSDK.registerBLEStateReceiver(this);
-        Log.i(TAG, "OxyZenSDK Version: " + ZenLiteSDK.getSdkVersion());
     }
 
     @Override
@@ -64,6 +65,14 @@ public class ScanActivity extends BaseActivity {
         return true;
     }
 
+    public boolean isLocationServiceEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager != null) {
+            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+        return false;
+    }
+
     private void scanDevices() {
         if (ZenLiteSDK.isScanning) {
             dismissLoadingDialog();
@@ -76,7 +85,7 @@ public class ScanActivity extends BaseActivity {
             return;
         }
 
-        BluetoothAdapter adapter = ((BluetoothManager) this.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || !adapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -133,14 +142,6 @@ public class ScanActivity extends BaseActivity {
         }, null);
     }
 
-    public boolean isLocationServiceEnabled(Context context) {
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        if (locationManager != null) {
-            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        }
-        return false;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_scan_device) {
@@ -149,6 +150,67 @@ public class ScanActivity extends BaseActivity {
             scanDevices();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    DeviceListener listener = new DeviceListener();
+
+    public void connect() {
+        ZenLiteDevice device = selectedZenLiteDevice;
+        device.setListener(listener);
+        device.connect(this);
+    }
+
+    public void updateName() {
+        ZenLiteDevice device = selectedZenLiteDevice;
+        device.setDeviceName("JXZ-专注力", error -> {
+            if (error != null) {
+                ZenLiteSDK.logI(TAG, "setDeviceName failed" + error.getCode() + error.getMessage());
+            } else {
+                ZenLiteSDK.logI(TAG, "setDeviceName success");
+            }
+        });
+    }
+
+    private class DeviceListener extends ZenLiteDeviceListener {
+        @Override
+        public void onDeviceInfoReady(DeviceInfo info) {
+            ZenLiteSDK.logI(TAG, "info=" + info);
+        }
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onBatteryLevelChange(int batteryLevel) {
+            ZenLiteSDK.logI(TAG, "batteryLevel=" + batteryLevel);
+        }
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onConnectivityChange(ZenLiteSDK.Connectivity connectivity) {
+            ZenLiteSDK.logI(TAG, "connectivity=" + connectivity);
+            if (connectivity == ZenLiteSDK.Connectivity.CONNECTED) {
+                ZenLiteDevice device = selectedZenLiteDevice;
+                if (device.inPairingMode()) {
+                    device.pair(error -> {
+                        if (error != null) {
+                            ZenLiteSDK.logI(TAG, "pair failed: " + error);
+                        } else {
+                            ZenLiteSDK.logI(TAG, "pair success");
+                            updateName();
+                        }
+                    });
+                } else if (device.isInNormalMode()) {
+                    device.validatePairInfo(error -> {
+                        if (error != null) {
+                            ZenLiteSDK.logI(TAG, "validatePairInfo failed: " + error);
+                        } else {
+                            ZenLiteSDK.logI(TAG, "validatePairInfo success");
+                            updateName();
+                        }
+                    });
+                }
+
+            }
+        }
     }
 
     public static class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.DeviceViewHolder> {
@@ -186,7 +248,6 @@ public class ScanActivity extends BaseActivity {
             return new DeviceViewHolder(view);
         }
 
-        @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onBindViewHolder(DeviceViewHolder holder, int position) {
             final ZenLiteDevice device = context.devices.get(position);
@@ -197,6 +258,10 @@ public class ScanActivity extends BaseActivity {
             holder.itemView.setOnClickListener(v -> {
                 ZenLiteSDK.stopScan();
                 setSelectedZenLiteDevice(device);
+                if (context.connectDirectly) {
+                    context.connect();
+                    return;
+                }
                 Intent intent = new Intent(context, DeviceActivity.class);
                 context.startActivity(intent);
                 // clear scan results
@@ -211,3 +276,4 @@ public class ScanActivity extends BaseActivity {
         }
     }
 }
+
